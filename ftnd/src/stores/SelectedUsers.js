@@ -54,12 +54,12 @@ export const useSearchStore = defineStore('search', () => {
   };
 
   onMounted(async () => {
-    await fetchData(`http://0.0.0.0:3000/users?description`);
+    await fetchData(`http://localhost:3000/users?description`);
   });
 
   const getUsers = debounce(async() => {
     try {
-        await fetchData(`http://0.0.0.0:3000/users?description=${search.value}`);
+        await fetchData(`http://localhost:3000/users?description=${search.value}`);
     } catch (error) {
         console.log('Error fetching data from API:', error.message)
     }
