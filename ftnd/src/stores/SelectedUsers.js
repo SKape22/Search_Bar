@@ -1,4 +1,4 @@
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, toRaw } from 'vue'
 import { defineStore } from 'pinia'
 import debounce from 'lodash.debounce';
 
@@ -23,6 +23,7 @@ export const useSearchStore = defineStore('search', () => {
     } else {
         updatedApiData.push(removedUser);
     }
+
     apiData.value = updatedApiData;
   }
 
@@ -30,23 +31,26 @@ export const useSearchStore = defineStore('search', () => {
     if (e.key === 'Backspace' && search.value === "") 
       users.value.pop();
   }
-  
+
   async function filterData() {
-    apiData.value = apiData.value.filter(apiEntry => !users.value.includes(apiEntry));;
+    apiData.value = apiData.value.filter(apiEntry => {
+      return !users.value.some(userEntry => {
+        return apiEntry.id === userEntry.id;
+      });
+    });
   }
 
   async function handleClick(item) {
     addUser(item);
   }
 
-
   const fetchData = async (url) => {
     try {
+        console.log(users.value);
         const response = await fetch(url);
         const data = await response.json();
-        console.log('API request successful');
         apiData.value = data.result;
-        await filterData(data.result);
+        await filterData();
 
     } catch (error) {
         console.error('Error fetching data from API:', error);
@@ -63,7 +67,7 @@ export const useSearchStore = defineStore('search', () => {
     } catch (error) {
         console.log('Error fetching data from API:', error.message)
     }
-  }, 500)
+  }, 400)
 
   watch(search, getUsers);
 
